@@ -162,7 +162,12 @@ public class NodeServer {
 		acceptThread.start();
 	}
 	
-	public static void removeNode(int index) {
+	/**
+	 * Removes a node from the list of nodes.
+	 * WARNING: If the node's thread has not been stopped first, it will continue to run and cause errors!!
+	 * @param index
+	 */
+	public synchronized static void removeNode(int index) {
 		if (nodes[index] != null) {
 			nodes[index] = null;
 		}

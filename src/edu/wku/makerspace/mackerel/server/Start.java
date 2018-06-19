@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.Scanner;
 
 public class Start {
-	public static final String version = "0.1.3";
+	public static final String version = "0.2-alpha";
 	private static Scanner input;
 	
 	public static void main(String[] args) {
@@ -22,14 +22,17 @@ public class Start {
 		}
 		
 		//connect to database
-		boolean con = DBConn.connect(ConfigReader.getOption("db_user"), ConfigReader.getOption("db_address"), ConfigReader.getOption("db_passwd"));
+		/*boolean con = DBConn.connect(ConfigReader.getOption("db_user"), ConfigReader.getOption("db_address"), ConfigReader.getOption("db_passwd"));
 		if (!con) {
 			System.out.println("Failed to connect to MySQL database at " + ConfigReader.getOption("db_address"));
 			System.out.println("Aborting!");
 			System.exit(0);
 		}
 		DBConn.query("USE " + ConfigReader.getOption("db_database"));
-		System.out.println("Database connection established");
+		System.out.println("Database connection established");*/
+		
+		//instantiate appointment calendar
+		Calendar.reload();
 		
 		//begin node server
 		System.out.println("Starting node server...");

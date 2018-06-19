@@ -68,6 +68,15 @@ public class KioskNode extends Node {
 				}
 			}
 		}
+		if (message.equals("QUEUE_CHECK")) {
+			if (args[0].equals("ALL")) {
+				//will send all queues from all ToolNode instances
+				
+			} else {
+				//args[0] should be the nid of a ToolNode instance
+				
+			}
+		}
 		super.onRecv(message, args);
 	}
 }
