@@ -36,8 +36,24 @@ public class ToolNode extends Node {
 	protected boolean setActiveUser(String userid) {
 		if (!inUse) {
 			userIdUsing = userid;
+			if (userIdUsing != "NONE") {
+				inUse = true;
+			} else {
+				inUse = false;
+			}
 			return true;
 		} else return false;
+	}
+	
+	/**
+	 * Advances the queue to the next person.
+	 */
+	public void advanceQueue() {
+		if (queue.peek() == null) {
+			setActiveUser("NONE");
+		} else {
+			setActiveUser(queue.poll());
+		}
 	}
 	
 	@Override

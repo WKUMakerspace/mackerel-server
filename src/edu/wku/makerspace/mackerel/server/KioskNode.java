@@ -27,9 +27,13 @@ public class KioskNode extends Node {
 	 */
 	private void signout(String userid) {
 		for (Node n : NodeServer.getNodeList()) {
-			if (n instanceof ToolNode) {
-				//handle signout on fellow nodes
-				
+			if (n != null) {
+				if (n instanceof ToolNode) {
+					//handle signout on fellow nodes
+					if (userid == ((ToolNode)n).getActiveUser()) {
+						//((ToolNode)n).advanceQueue();
+					}
+				}
 			}
 		}
 		if (DBConn.signout(userid)) {
@@ -42,30 +46,47 @@ public class KioskNode extends Node {
 	@Override
 	protected void onRecv(String message, String[] args) {
 		if (message.equals("SIGNIN")) {
-			signin(args[0]);
+			signin(xor(args[0]));
 		}
 		if (message.equals("SIGNOUT")) {
-			signout(args[0]);
+			signout(xor(args[0]));
 		}
 		if (message.equals("USER_CREATE")) {
-			if (DBConn.checkUser(args[0]) != null) {
-				send("RESP_FAILURE");
+			if (DBConn.checkUser(xor(args[0])) != null) {
+				send("RESP_FAILURE;USER_EXISTS");
 			} else {
 				try {
-					String q = "INSERT INTO users (wku_id, lastname, firstname) VALUES ('"+args[0]+"','"+args[1]+"','"+args[2]+"')";
+					String q = "INSERT INTO users (wku_id, lastname, firstname) VALUES ('"+xor(args[0])+"','"+args[1]+"','"+args[2]+"')";
 					if (args.length > 3) {
-						q = "INSERT INTO users (wku_id, lastname, firstname, phone) VALUES ('"+args[0]+"','"+args[1]+"','"+args[2]+"','"+args[3]+"')";
+						q = "INSERT INTO users (wku_id, lastname, firstname, phone) VALUES ('"+xor(args[0])+"','"+args[1]+"','"+args[2]+"','"+args[3]+"')";
 					}
 					DBConn.query(q);
 				} catch (Exception e) {
 					//e.printStackTrace();
 					send("RESP_FAILURE");
 				}
-				if (DBConn.checkUser(args[0]) != null) {
+				if (DBConn.checkUser(xor(args[0])) != null) {
 					send("RESP_SUCCESS");
 				} else {
 					send("RESP_FAILURE");
 				}
+			}
+		}
+		if (message.equals("USER_MODIFY")) {
+			if (DBConn.checkUser(xor(args[0])) != null) {
+				try {
+					String q = "UPDATE users SET lastname="+args[1]+", firstname="+args[2];
+					if (args.length > 3) {
+						q = q + ", phone=" + args[3];
+					}
+					q = q + " WHERE wku_id=" + xor(args[0]);
+					DBConn.query(q);
+				} catch (Exception e) {
+					//e.printStackTrace();
+					send("RESP_FAILURE");
+				}
+			} else {
+				send("RESP_FAILURE;USER_DOES_NOT_EXIST");
 			}
 		}
 		if (message.equals("QUEUE_CHECK")) {

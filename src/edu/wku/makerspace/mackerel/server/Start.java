@@ -1,10 +1,13 @@
 package edu.wku.makerspace.mackerel.server;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Random;
 import java.util.Scanner;
 
 public class Start {
-	public static final String version = "0.2-alpha";
+	public static final String version = "0.2.2";
 	private static Scanner input;
 	
 	public static void main(String[] args) {
@@ -21,15 +24,19 @@ public class Start {
 			System.exit(0);
 		}
 		
+		//generate key for secure communication between nodes
+		Node.key = genKey();
+		//System.out.println("key: "+Node.key);
+		
 		//connect to database
-		/*boolean con = DBConn.connect(ConfigReader.getOption("db_user"), ConfigReader.getOption("db_address"), ConfigReader.getOption("db_passwd"));
+		boolean con = DBConn.connect(ConfigReader.getOption("db_user"), ConfigReader.getOption("db_address"), ConfigReader.getOption("db_passwd"));
 		if (!con) {
 			System.out.println("Failed to connect to MySQL database at " + ConfigReader.getOption("db_address"));
 			System.out.println("Aborting!");
 			System.exit(0);
 		}
 		DBConn.query("USE " + ConfigReader.getOption("db_database"));
-		System.out.println("Database connection established");*/
+		System.out.println("Database connection established");
 		
 		//instantiate appointment calendar
 		Calendar.reload();
@@ -46,6 +53,7 @@ public class Start {
 		//wrap up threads and close server
 		NodeServer.close();
 		DBConn.disconnect();
+		
 		System.out.println("Goodbye!");
 	}
 	
@@ -97,5 +105,15 @@ public class Start {
 	private static void printHelp() {
 		String help = "No one can help you now.";
 		System.out.println(help);
+	}
+	
+	private static int genKey() {
+		long t = LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toEpochSecond();
+		Random rng = new Random(t);
+		int salt = 0;
+		for (int i = 0; i < Integer.parseInt(ConfigReader.getOption("nth_key")); i++) {
+			salt = rng.nextInt();
+		}
+        return salt;
 	}
 }

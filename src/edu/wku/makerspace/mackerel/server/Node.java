@@ -12,6 +12,8 @@ public class Node extends Thread {
 	protected BufferedReader in;
 	protected PrintWriter out;
 	private boolean keepRunning = true;
+	private boolean requestedClose = false;
+	public static int key;
 	
 	public Node(Socket newsock, String newnid, BufferedReader newin, PrintWriter newout) {
 		nid = newnid;
@@ -32,6 +34,17 @@ public class Node extends Thread {
 	 */
 	public String getNodeId() {
 		return nid;
+	}
+	
+	/**
+	 * Xors the input string with a common key. Increases security by preventing the sending of
+	 * student identifiers over unencrypted TCP.
+	 * @param input
+	 * @return
+	 */
+	public static String xor(String input) {
+		int a = Integer.parseInt(input);
+		return "" + (a ^ key);
 	}
 	
 	/**
@@ -73,7 +86,7 @@ public class Node extends Thread {
 			close();
 		}
 		if (message.equals("USER_CHECK")) {
-			String[] check = DBConn.checkUser(args[0]);
+			String[] check = DBConn.checkUser(xor(args[0]));
 			if (check != null) {
 				send("RESP;" + check[0] + ";" + check[1] + ";" + check[2]);
 			} else {
@@ -105,6 +118,10 @@ public class Node extends Thread {
 			NodeServer.removeNode(i);
 		}
 		System.out.println("Thread for node " + nid + " has finished.");
+	}
+	
+	public boolean isRunning() {
+		return keepRunning && !requestedClose;
 	}
 	
 	/**

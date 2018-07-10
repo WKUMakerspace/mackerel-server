@@ -32,10 +32,19 @@ public class DBConn {
 					ret = st.executeQuery(query);
 				}
 			} catch (SQLException e) {
-				//e.printStackTrace();
+				e.printStackTrace();
 			}
 		}
 		return ret;
+	}
+	
+	
+	public static String updateRecords(String table, String toset, String... conditions) {
+		String q = "UPDATE " + table + " SET " + toset + " WHERE " + conditions[0];
+		for (int i = 1; i < conditions.length; i++) {
+			q = q + " AND " + conditions[i];
+		}
+		return q;
 	}
 	
 	/**
