@@ -7,7 +7,7 @@ import java.util.Random;
 import java.util.Scanner;
 
 public class Start {
-	public static final String version = "0.2.2";
+	public static final String version = "0.2.3";
 	private static Scanner input;
 	
 	public static void main(String[] args) {
@@ -25,8 +25,10 @@ public class Start {
 		}
 		
 		//generate key for secure communication between nodes
-		Node.key = genKey();
-		//System.out.println("key: "+Node.key);
+		Node.key = genKey(Integer.parseInt(ConfigReader.getOption("nth_key")));
+		System.out.print("key: ");
+		System.out.printf("%x", Node.key);
+		System.out.println();
 		
 		//connect to database
 		boolean con = DBConn.connect(ConfigReader.getOption("db_user"), ConfigReader.getOption("db_address"), ConfigReader.getOption("db_passwd"));
@@ -39,10 +41,9 @@ public class Start {
 		System.out.println("Database connection established");
 		
 		//instantiate appointment calendar
-		Calendar.reload();
+		//Calendar.reload();
 		
 		//begin node server
-		System.out.println("Starting node server...");
 		NodeServer.begin(Integer.parseInt(ConfigReader.getOption("port")));
 		
 		//begin command line
@@ -107,11 +108,11 @@ public class Start {
 		System.out.println(help);
 	}
 	
-	private static int genKey() {
+	private static long genKey(int num) {
 		long t = LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toEpochSecond();
 		Random rng = new Random(t);
-		int salt = 0;
-		for (int i = 0; i < Integer.parseInt(ConfigReader.getOption("nth_key")); i++) {
+		long salt = 0;
+		for (int i = 0; i < num; i++) {
 			salt = rng.nextInt();
 		}
         return salt;

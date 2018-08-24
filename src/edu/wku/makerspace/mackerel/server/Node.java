@@ -13,7 +13,7 @@ public class Node extends Thread {
 	protected PrintWriter out;
 	private boolean keepRunning = true;
 	private boolean requestedClose = false;
-	public static int key;
+	public static long key;
 	
 	public Node(Socket newsock, String newnid, BufferedReader newin, PrintWriter newout) {
 		nid = newnid;
@@ -38,13 +38,14 @@ public class Node extends Thread {
 	
 	/**
 	 * Xors the input string with a common key. Increases security by preventing the sending of
-	 * student identifiers over unencrypted TCP.
+	 * student ids over unencrypted TCP.
 	 * @param input
 	 * @return
 	 */
 	public static String xor(String input) {
-		int a = Integer.parseInt(input);
-		return "" + (a ^ key);
+		long a = Long.parseLong(input);
+		System.out.println(input + " --> " + ((a ^ key) & Integer.MAX_VALUE));
+		return "" + ((a ^ key) & Integer.MAX_VALUE);
 	}
 	
 	/**

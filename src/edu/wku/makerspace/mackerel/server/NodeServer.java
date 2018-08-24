@@ -78,9 +78,11 @@ public class NodeServer {
 	public static void begin(int port) {
 		nodes = new Node[Integer.parseInt(ConfigReader.getOption("max_nodes"))];
 		try {
-			System.out.println("Starting node server on port " + port);
+			System.out.print("Starting node server on port " + port + " ... ");
 			serv = new ServerSocket(port);
+			System.out.println("success");
 		} catch (Exception e) {
+			System.out.println("failed");
 			e.printStackTrace();
 			System.out.println("Failed to start node server. Aborting!");
 			System.exit(0);

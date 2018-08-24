@@ -13,8 +13,8 @@ public class KioskNode extends Node {
 	 * Processes a sign-in request from the kiosk client.
 	 * @param userid
 	 */
-	private void signin(String userid) {
-		if (DBConn.signin(userid)) {
+	private void signin(String userid, String desc) {
+		if (DBConn.signin(userid, desc)) {
 			send("RESP_SUCCESS");
 		} else {
 			send("RESP_FAILURE");
@@ -43,10 +43,36 @@ public class KioskNode extends Node {
 		}
 	}
 	
+	/**
+	 * Sends the contents of the specified node's queue, assuming it is a ToolNode. 
+	 * @param nodeid
+	 */
+	private void sendQueueContentsOfNode(String nodeid) {
+		ToolNode tool = (ToolNode)NodeServer.getNodeById(nodeid);
+		if (tool == null) {
+			send("RESP_FAILURE;NODE_DOES_NOT_EXIST");
+		} else {
+			String[] content = tool.getQueueContents();
+			if (content == null) {
+				send("RESP;"+nodeid+";QUEUE_EMPTY");
+			} else {
+				String tosend = "RESP;"+nodeid;
+				for (int i = 0; i < content.length; i++) {
+					tosend = tosend + ";" + xor(content[i]);
+				}
+				send(tosend);
+			}
+		}
+	}
+	
 	@Override
 	protected void onRecv(String message, String[] args) {
 		if (message.equals("SIGNIN")) {
-			signin(xor(args[0]));
+			if (args.length > 1) {
+				signin(xor(args[0]), args[1]);
+			} else {
+				signin(xor(args[0]), null);
+			}
 		}
 		if (message.equals("SIGNOUT")) {
 			signout(xor(args[0]));
@@ -63,7 +89,7 @@ public class KioskNode extends Node {
 					DBConn.query(q);
 				} catch (Exception e) {
 					//e.printStackTrace();
-					send("RESP_FAILURE");
+					//send("RESP_FAILURE");
 				}
 				if (DBConn.checkUser(xor(args[0])) != null) {
 					send("RESP_SUCCESS");
@@ -92,10 +118,15 @@ public class KioskNode extends Node {
 		if (message.equals("QUEUE_CHECK")) {
 			if (args[0].equals("ALL")) {
 				//will send all queues from all ToolNode instances
-				
+				Node[] list = NodeServer.getNodeList();
+				for (Node n : list) {
+					if (n instanceof ToolNode) {
+						sendQueueContentsOfNode(n.getNodeId());
+					}
+				}
 			} else {
 				//args[0] should be the nid of a ToolNode instance
-				
+				sendQueueContentsOfNode(args[0]);
 			}
 		}
 		super.onRecv(message, args);

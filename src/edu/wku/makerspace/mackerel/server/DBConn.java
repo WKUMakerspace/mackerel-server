@@ -25,6 +25,7 @@ public class DBConn {
 			try {
 				if (st != null) st.close();
 				st = conn.createStatement();
+				System.out.println("Querying DB: " + query);
 				String type = query.substring(0, query.indexOf(' '));
 				if (type.equalsIgnoreCase("INSERT") || type.equalsIgnoreCase("UPDATE") || type.equalsIgnoreCase("DELETE")) {
 					st.executeUpdate(query);
@@ -100,7 +101,7 @@ public class DBConn {
 	 * Signs a user into the system.
 	 * @param userid
 	 */
-	public static boolean signin(String userid) {
+	public static boolean signin(String userid, String desc) {
 		String date = LocalDate.now().toString(); //YYYY-MM-DD
 		String time = LocalTime.now().toString().substring(0,8); //hh:mm:ss
 		ResultSet today = query("SELECT * FROM attendance WHERE date='" + date + "'");
@@ -111,7 +112,13 @@ public class DBConn {
 					return false;
 				}
 			}
-			query("INSERT INTO attendance (wku_id, date, time_in) VALUES (" + userid + "," + date + "," + time + ")");
+			String q = "INSERT INTO attendance (wku_id, date, time_in";
+			if (desc == null) {
+				q += ") VALUES ('" + userid + "','" + date + "','" + time + "')";
+			} else {
+				q += ", description) VALUES ('" + userid + "','" + date + "','" + time + "','" + desc + "')";
+			}
+			query(q);
 		} catch (SQLException e) {
 			e.printStackTrace();
 			return false;
